@@ -4,7 +4,7 @@ export const PRODUCTION_URL = process.env.PRODUCTION_URL as string
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL
 
 // ### Socials & SEO
-export const NEXT_PUBLIC_SITE_NAME = `SaaSKit` as string
+export const NEXT_PUBLIC_SITE_NAME = `Next SaaS Kit v2` as string
 export const APP_SLOGAN = `Launch your SaaS faster` as string
 export const APP_DESCRIPTION = `The ultimate toolkit` as string
 export const APP_DESCRIPTION_LONG =

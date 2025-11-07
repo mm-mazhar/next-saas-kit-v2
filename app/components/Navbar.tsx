@@ -4,7 +4,9 @@ import {
   RegisterLink,
 } from '@kinde-oss/kinde-auth-nextjs/components'
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
-import Textlogo from './Textlogo'
+// import Textlogo from './Textlogo'
+import Imagelogo from './ImageLogo'
+
 import { Themetoggle } from './Themetoggle'
 import { UserNav } from './UserNav'
 
@@ -16,7 +18,8 @@ export async function Navbar() {
     <nav className='border-b bg-background h-[10vh] flex items-center'>
       <div className='w-full flex items-center justify-between px-4 sm:px-6 lg:px-8'>
         {/* ---- LEFT SIDE (Child 1) ---- */}
-        <Textlogo />
+        {/* <Textlogo /> */}
+        <Imagelogo />
 
         {/* ---- RIGHT SIDE WRAPPER (Child 2) ---- */}
         {/* This new div groups everything on the right */}
