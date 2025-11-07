@@ -2,7 +2,7 @@
 
 - 🚀 Kinde Auth: https://dub.sh/xeU8r3v
 
-- 👨🏻‍💻 GitHub Repository: https://github.com/mm-mazhar/SaaSKit
+- 👨🏻‍💻 GitHub Repository: https://github.com/mm-mazhar/next-saas-kit-v2
 - 🌍 My Website: https://mm-mazhar.github.io/mmazhar.github.io/
 - 📧 Business ONLY: mazqoty.01@gmail.com
 
