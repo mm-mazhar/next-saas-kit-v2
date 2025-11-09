@@ -1,79 +1,33 @@
+// app/dashboard/layout.tsx
+
 import { SideNav } from '@/app/components/SideNav'
-import prisma from '@/app/lib/db'
-import { stripe } from '@/app/lib/stripe'
-import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
-import { unstable_noStore as noStore } from 'next/cache'
+import { getData } from '@/app/lib/db'
+import { createClient } from '@/app/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { ReactNode } from 'react'
 
-async function getData({
-  email,
-  id,
-  firstName,
-  lastName,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  profileImage,
-}: {
-  email: string
-  id: string
-  firstName: string | undefined | null
-  lastName: string | undefined | null
-  profileImage: string | undefined | null
-}) {
-  noStore()
-  const user = await prisma.user.findUnique({
-    where: {
-      id: id,
-    },
-    select: {
-      id: true,
-      stripeCustomerId: true,
-    },
-  })
+async function DashboardLayout({ children }: { children: ReactNode }) {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
   if (!user) {
-    const name = `${firstName ?? ''} ${lastName ?? ''}`
-    await prisma.user.create({
-      data: {
-        id: id,
-        email: email,
-        name: name,
-      },
-    })
+    return redirect('/get-started')
   }
 
-  if (!user?.stripeCustomerId) {
-    const data = await stripe.customers.create({
-      email: email,
-    })
+  // Get or create user in database
+  const userName =
+    user.user_metadata?.full_name || user.email?.split('@')[0] || 'User'
+  const [firstName, ...lastNameParts] = userName.split(' ')
+  const lastName = lastNameParts.join(' ')
 
-    await prisma.user.update({
-      where: {
-        id: id,
-      },
-      data: {
-        stripeCustomerId: data.id,
-      },
-    })
-  }
-}
-
-export default async function DashboardLayout({
-  children,
-}: {
-  children: ReactNode
-}) {
-  const { getUser } = getKindeServerSession()
-  const user = await getUser()
-  if (!user) {
-    return redirect('/')
-  }
   await getData({
     email: user.email as string,
-    firstName: user.given_name as string,
-    id: user.id as string,
-    lastName: user.family_name as string,
-    profileImage: user.picture,
+    firstName: firstName,
+    id: user.id,
+    lastName: lastName,
+    profileImage: user.user_metadata?.avatar_url,
   })
 
   return (
@@ -85,3 +39,5 @@ export default async function DashboardLayout({
     </div>
   )
 }
+
+export default DashboardLayout

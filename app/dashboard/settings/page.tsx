@@ -1,4 +1,8 @@
+// app/dashboard/settings/page.tsx
+
+import { SubmitButton } from '@/app/components/Submitbuttons'
 import prisma from '@/app/lib/db'
+import { createClient } from '@/app/lib/supabase/server'
 import {
   Card,
   CardContent,
@@ -18,11 +22,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
-
-import { SubmitButton } from '@/app/components/Submitbuttons'
-
 import { unstable_noStore as noStore, revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 
 async function getData(userId: string) {
   noStore()
@@ -41,9 +42,16 @@ async function getData(userId: string) {
 }
 
 export default async function SettingPage() {
-  const { getUser } = getKindeServerSession()
-  const user = await getUser()
-  const data = await getData(user?.id as string)
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return redirect('/get-started')
+  }
+
+  const data = await getData(user.id)
 
   async function postData(formData: FormData) {
     'use server'
@@ -84,7 +92,6 @@ export default async function SettingPage() {
           </CardHeader>
           <CardContent className='pt-3'>
             <div className='space-y-4'>
-              {/* <br></br> */}
               <div className='space-y-1'>
                 <Label>Your Name</Label>
                 <Input

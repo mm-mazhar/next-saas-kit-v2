@@ -1,20 +1,22 @@
 // app/components/Navbar.tsx
 
+import { createClient } from '@/app/lib/supabase/server'
 import { Button } from '@/components/ui/button'
-import {
-  LoginLink,
-  RegisterLink,
-} from '@kinde-oss/kinde-auth-nextjs/components'
-import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
+import Link from 'next/link'
 import Textlogo from './Textlogo'
-// import Imagelogo from './ImageLogo'
-
 import { Themetoggle } from './Themetoggle'
 import { UserNav } from './UserNav'
+// import { Imagelogo } from './ImageLogo'
 
-export async function Navbar() {
-  const { getUser } = getKindeServerSession()
-  const user = await getUser()
+export default async function Navbar() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  // Get user metadata for display
+  const userName =
+    user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'
 
   return (
     <nav className='border-b bg-background h-[10vh] flex items-center'>
@@ -22,29 +24,22 @@ export async function Navbar() {
         {/* ---- LEFT SIDE (Child 1) ---- */}
         <Textlogo />
         {/* <Imagelogo /> */}
-
         {/* ---- RIGHT SIDE WRAPPER (Child 2) ---- */}
-        {/* This new div groups everything on the right */}
         <div className='flex items-center gap-x-2'>
           {/* Conditional auth buttons */}
           {user ? (
             <UserNav
-              email={user?.email as string}
-              image={user?.picture as string}
-              name={user?.given_name as string}
+              email={user.email as string}
+              image={user.user_metadata?.avatar_url}
+              name={userName}
             />
           ) : (
-            <div className='flex items-center gap-x-2'>
-              <LoginLink>
-                <Button>Sign In</Button>
-              </LoginLink>
-              <RegisterLink>
-                <Button variant='secondary'>Sign Up</Button>
-              </RegisterLink>
-            </div>
+            <Link href='/login'>
+              <Button size='lg'>Get Started</Button>
+            </Link>
           )}
 
-          {/* Theme toggle is now inside the right-side group */}
+          {/* Theme toggle */}
           <Themetoggle />
         </div>
       </div>

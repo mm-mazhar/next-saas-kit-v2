@@ -1,5 +1,6 @@
 // app/components/UserNav.tsx
 
+import { LogoutButton } from '@/app/components/LogoutButton'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -11,13 +12,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { LogoutLink } from '@kinde-oss/kinde-auth-nextjs/components'
-import { CreditCard, DoorClosed, Home, Settings } from 'lucide-react'
-
+import { CreditCard, Home, Settings } from 'lucide-react'
 import Link from 'next/link'
 
 export const navItems = [
-  { name: 'Dashbaord', href: '/dashboard', icon: Home },
+  { name: 'Dashboard', href: '/dashboard', icon: Home },
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
   { name: 'Billing', href: '/dashboard/billing', icon: CreditCard },
 ]
@@ -29,7 +28,7 @@ export function UserNav({
 }: {
   name: string
   email: string
-  image: string
+  image?: string
 }) {
   // Generate initials from name
   const getInitials = (name: string) => {
@@ -84,12 +83,7 @@ export function UserNav({
           className='w-full flex justify-between items-center'
           asChild
         >
-          <LogoutLink>
-            Logout{' '}
-            <span>
-              <DoorClosed className='w-4 h-4' />
-            </span>
-          </LogoutLink>
+          <LogoutButton />
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

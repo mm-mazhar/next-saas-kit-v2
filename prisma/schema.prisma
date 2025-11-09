@@ -12,12 +12,14 @@ datasource db {
 }
 
 model User {
-  id               String        @id @unique
+  id               String        @id @unique  // This will be the Supabase Auth user UUID
   name             String?
   email            String        @unique
   stripeCustomerId String?       @unique
   colorScheme      String        @default("theme-orange")
   Subscription     Subscription?
+  createdAt        DateTime      @default(now())  // Add this
+  updatedAt        DateTime      @updatedAt       // Add this
 }
 
 model Subscription {

@@ -1,3 +1,5 @@
+// lib/constants.ts
+
 // ### NEXT APP
 export const LOCAL_SITE_URL = process.env.LOCAL_SITE_URL as string
 export const PRODUCTION_URL = process.env.PRODUCTION_URL as string

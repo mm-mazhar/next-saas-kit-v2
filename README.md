@@ -69,6 +69,13 @@ This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-opti
 - npx prisma db push
 - npx prisma studio
 - npx prisma generate
+
+Create database migration
+- npx prisma migrate dev --name migration_name
+
+Test Supabase connection (in node)
+- node -e "const { createClient } = require('@supabase/supabase-js'); const s = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY); s.auth.getSession().then(console.log);"
+
 ```
 
 ## Stripe Useful Commands

@@ -1,9 +1,12 @@
+// app/dashboard/billing/page.tsx
+
 import {
   StripePortal,
   StripeSubscriptionCreationButton,
 } from '@/app/components/Submitbuttons'
 import prisma from '@/app/lib/db'
 import { getStripeSession, stripe } from '@/app/lib/stripe'
+import { createClient } from '@/app/lib/supabase/server'
 import {
   Card,
   CardContent,
@@ -11,7 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
+
 import { CheckCircle2 } from 'lucide-react'
 import { unstable_noStore as noStore } from 'next/cache'
 import { redirect } from 'next/navigation'
@@ -60,28 +63,53 @@ async function getData(userId: string) {
 }
 
 export default async function BillingPage() {
-  const { getUser } = getKindeServerSession()
-  const user = await getUser()
-  const data = await getData(user?.id as string)
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return redirect('/get-started')
+  }
+
+  const data = await getData(user.id)
 
   async function createSubscription() {
     'use server'
 
+    // Get or create Stripe customer
     const dbUser = await prisma.user.findUnique({
-      where: {
-        id: user?.id,
-      },
-      select: {
-        stripeCustomerId: true,
-      },
+      where: { id: user?.id },
+      select: { stripeCustomerId: true, email: true, name: true },
     })
 
-    if (!dbUser?.stripeCustomerId) {
-      throw new Error('Unable to get customer id')
+    let stripeCustomerId = dbUser?.stripeCustomerId
+
+    // If no Stripe customer exists, create one
+    if (!stripeCustomerId) {
+      // Add this check first
+      if (!dbUser?.email) {
+        throw new Error('User email not found')
+      }
+
+      // Now TypeScript knows dbUser and dbUser.email exist
+      const stripeCustomer = await stripe.customers.create({
+        email: dbUser.email, // ✅ Safe - already checked above
+        name: dbUser.name || undefined,
+      })
+
+      // Update database with new customer ID
+      await prisma.user.update({
+        where: { id: user?.id },
+        data: { stripeCustomerId: stripeCustomer.id },
+      })
+
+      stripeCustomerId = stripeCustomer.id
     }
 
+    // Now create subscription with the customer ID
     const subscriptionUrl = await getStripeSession({
-      customerId: dbUser.stripeCustomerId,
+      customerId: stripeCustomerId,
       domainUrl:
         process.env.NODE_ENV === 'production' ? PRODUCTION_URL : LOCAL_SITE_URL,
       priceId: STRIPE_PRICE_ID,

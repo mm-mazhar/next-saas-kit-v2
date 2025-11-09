@@ -1,11 +1,13 @@
-import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server'
+// app/layout.tsx
+
+import { createClient } from '@/app/lib/supabase/server'
 import type { Metadata } from 'next'
 import { unstable_noStore as noStore } from 'next/cache'
 import { Inter } from 'next/font/google'
-import { Navbar } from './components/Navbar'
+import Navbar from './components/Navbar'
 import { ThemeProvider } from './components/theme-provider'
 import './globals.css'
-import prisma from './lib/db'
+import prisma from '@/app/lib/db'
 
 import {
   APP_DESCRIPTION,
@@ -16,6 +18,8 @@ import {
   SITE_URL,
   TWITTER_ID,
 } from '@/lib/constants'
+
+const inter = Inter({ subsets: ['latin'] })
 
 // const geistSans = Geist({
 //   variable: '--font-geist-sans',
@@ -41,8 +45,6 @@ import {
 //   TWITTER_ID,
 // })
 // // ===================================================================
-
-const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: `${NEXT_PUBLIC_SITE_NAME} - ${APP_SLOGAN}`,
@@ -98,8 +100,11 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const { getUser } = getKindeServerSession()
-  const user = await getUser()
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
   const data = await getData(user?.id as string)
 
   return (
